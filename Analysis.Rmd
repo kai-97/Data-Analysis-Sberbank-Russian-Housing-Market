@@ -1,0 +1,109 @@
+---
+title: "Sberbank Russian Housing Market Analysis"
+output: html_notebook
+---
+
+
+```{r}
+##Packages that need to be installed
+#install.packages('Amelia')
+#install.packages("ggplot2")
+#install.packages("tidyr")
+library(Amelia)
+library(magrittr)
+
+df<-read.csv("C://Users//mahe//Desktop//Pucho Hackathon//Working Data Set//macro.csv", header=TRUE)
+print(df)
+
+```
+
+
+```{r}
+missmap(df)
+```
+The Graph Shows the Missingness map of all the entities present in the dataset.
+
+```{r}
+miss_pct=function(data){
+  pct=sum(is.na(data))/length(data)
+}
+missing=sapply(df,miss_pct)%>%as.data.frame()
+colnames(missing)="miss_pct"
+missing=data.frame(missing_pct=missing,names=row.names(missing))
+missing=missing%>%arrange(desc(miss_pct))
+missing%>%ggplot(aes(x=reorder(names,-miss_pct),y=miss_pct))+
+geom_bar(stat = "identity",fill="blue")+theme(axis.text.x = element_text(angle = 60,hjust=1))+labs(x="Features with missing value", y="Percentage of missing value")
+```
+This graph gives us a more visible and a legible visualisation of the percentages of the missing values in the descendig order.
+```{r}
+plot(df$rent_price_3room_bus, type="l", col="blue", ylim=c(0,140), xlab = "Time", ylab = "Rent per month (in $)")
+lines(df$rent_price_2room_bus, type="l", col="red")
+lines(df$rent_price_1room_bus, type="l", col="green")
+lines(df$rent_price_3room_eco, type="l", col="yellow")
+lines(df$rent_price_2room_eco, type="l", col="cyan")
+lines(df$rent_price_1room_eco, type="l", col="purple")
+legend('topleft', legend=c('3-bus','2-bus','1-bus','3-eco','2-eco','1-eco'), lty=1, col=c('blue', 'red', 'green',' yellow',' cyan',' purple'), cex=.75)
+```
+This Graph represents the variation of the different rates of the homes in different areas.<br>
+Naturally the Hierarchy of the costs is different for the type of home(bus>eco) and the number of rooms(3>2>1).
+The '3-eco' and the '1-bus' lines overlap, which may indicate the similarities of the rates of rooms and thus, people might compromise a bit on the type of room and get more number of rooms instead of a bus home with 1 bedroom, so the prices might be fluctuating because of the availabilty and the demand.<br>
+In some areas the prices might have dropped really low and thus, the dips in '2-eco' and '1-eco'.<br>
+
+```{r}
+boxplot(df$provision_nurse,data=df, main="Provision Of Nurses",xlab="Number of Nurses available", horizontal = TRUE) 
+text(x=fivenum(df$provision_nurse), labels =fivenum(df$provision_nurse), y=1.25)
+```
+The Graph here signifies the number of nurses available in general in the whole of the data set analyzed.<br>
+The Spread is : 99.4-92.8 = 6.8<br>
+50% of the spread is at : 92.8 + (6.8/2) = 96.2<br>
+The Median is : 96.5<br>
+The Median is > than 50% of the spread and thus, it is a good thing for:<br>
+1. Governments/ Healthcare Companies to open up new Hospitals.<br>
+2. New Nurses for employment opportunities.<br>
+3. New Health Clinics to be set up if necessary.<br>
+
+
+
+```{r}
+boxplot(df$provision_doctors,data=df, main="Provision Of Doctors",xlab="Number of Doctors available", horizontal = TRUE, outline = FALSE) 
+text(x=fivenum(df$provision_doctors), labels =fivenum(df$provision_doctors), y=1.25)
+```
+The Graph here signifies the number of doctors available in general in the whole of the data set analyzed.<br>
+The Spread is : 65.8 - 61 = 4.8<br>
+50% of the spread is at : 65.8 + (4.8/2) = 68.2<br>
+The Median is : 65.2<br>
+The Median is > than 50% of the spread and thus, it is a good thing for:<br>
+1. Governments/ Healthcare Companies to open up new Hospitals.<br>
+2. New Doctors for employment opportunities.<br>
+3. New Health Clinics to be set up if necessary.<br>
+
+```{r}
+g <- ggplot(df, aes(df$mortgage_value, df$mortgage_rate))
+g + geom_point(col="purple")+geom_smooth(width = .5, size=1) +labs(y="Mortgage Rate", x="Mortgage Value", title="Mortgage Rate VS Mortgage Value")
+```
+Scatter Plot
+Here, we see a relation between the mortgage value and the mortgage rate.
+The rates look steady and not much of a wavering observed here.
+The minor changes are due to prices at different locations.
+
+```{r}
+plot(df$employment, main="Rate of Employment/Unemployment",type="l", col="blue", ylim=c(0,1), xlab = "Time", ylab = "Rate")
+lines(df$unemployment, type="l", col="red")
+legend('topleft', legend=c('Employment','Unemployment'), lty=1, col=c('blue', 'red'), cex=.75)
+
+```
+The rates of both employment as well as unemployment are the same and haven't changed.
+
+```{r}
+df%>%ggplot()+geom_histogram(aes(x=df$mortality,col="red",fill="red"), bins = 20)+labs(x="Mortality")
+```
+Shows the graph between number of deaths.
+
+```{r}
+df%>%ggplot()+geom_histogram(aes(x=df$childbirth,col=I("lightgreen"),fill=I("lightgreen")), bins = 20)+labs(x="Childbirth")
+```
+Shows the graph between number of births.
+```{r}
+
+```
+
